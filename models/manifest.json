@@ -1,0 +1,15 @@
+{
+  "id": "xlsr-phoneme-q4",
+  "name": "XLSR 多语言音素模型 · Q4",
+  "repository": "qnighy/wav2vec2-xlsr-53-espeak-cv-ft-ONNX",
+  "revision": "d2987af7ae07d53eafee15dc7190479062faa1e8",
+  "upstream": "facebook/wav2vec2-xlsr-53-espeak-cv-ft",
+  "license": "Apache-2.0",
+  "sampleRate": 16000,
+  "files": [
+    { "remote": "onnx/model_q4.onnx", "local": "model.onnx", "size": 241430967, "sha256": "d6268189f919b7eeecff55512d433fc704c12247537318d906a07698ff77cf70" },
+    { "remote": "vocab.json", "local": "vocab.json", "sha256": "d732ab2456c0c017930001dc9af0b41b3b93d25b2eb9740bf9d925508d7d87d0" },
+    { "remote": "config.json", "local": "config.json", "sha256": "8baff98019cdea8c3555b0d7adbcc199e1d265396dad1e7865474f16a582049c" },
+    { "remote": "preprocessor_config.json", "local": "preprocessor_config.json", "sha256": "a2254a5b58f72cd4de3632f8eee64f3f098b7c1402128d2f419e7d00ae13e335" }
+  ]
+}

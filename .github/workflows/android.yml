@@ -1,0 +1,86 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Cache pinned offline model
+        uses: actions/cache@v4
+        with:
+          path: public/models/phoneme
+          key: phoneme-${{ hashFiles('models/manifest.json') }}
+      - name: Download and verify model
+        run: npm run models:download
+      - name: Build and sync Android
+        run: npm run android:sync
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests including actual offline model inference
+        run: npm run test:e2e
+      - name: Build installable debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
+      - name: Collect APK and checksum
+        run: |
+          mkdir -p artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/voice-lab-debug.apk
+          sha256sum artifacts/voice-lab-debug.apk > artifacts/SHA256SUMS.txt
+      - name: Download APK here
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-lab-android-${{ github.run_number }}
+          path: |
+            artifacts/voice-lab-debug.apk
+            artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.run_number }}
+          path: |
+            playwright-report/
+            android/app/build/reports/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Build summary
+        run: |
+          echo '### 安卓测试安装包' >> "$GITHUB_STEP_SUMMARY"
+          echo '下载本次运行的 voice-lab-android 产物，解压后安装 APK。' >> "$GITHUB_STEP_SUMMARY"
+          echo '安装包包含离线音素模型，无在线识别服务。中文声调仅提供观察曲线。' >> "$GITHUB_STEP_SUMMARY"
+          echo '这是 debug 测试包。不同构建的默认签名可能不同；若无法覆盖安装，请先导出记录再卸载旧版。' >> "$GITHUB_STEP_SUMMARY"
