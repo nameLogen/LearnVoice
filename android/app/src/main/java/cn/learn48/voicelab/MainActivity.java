@@ -7,6 +7,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(VoiceLabPlugin.class);
+        registerPlugin(OfflineSpeechPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

@@ -2,7 +2,7 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 import type { RawInference } from './types';
 
 interface VoiceLabPlugin {
-  startRecording(): Promise<void>;
+  startRecording(options?: { maxSeconds: number }): Promise<void>;
   stopRecording(): Promise<{ samples: number[] }>;
   cancelRecording(): Promise<void>;
   prepare(): Promise<{ engine: string }>;

@@ -11,6 +11,7 @@ import type { Mode, Observation, PitchPoint } from './types';
 import { ReferencePlayer, type ReferencePlayerHandle } from './ReferencePlayer';
 import { ScoreCard } from './ScoreCard';
 import { scorePronunciation } from './scoring';
+import { ArticleReader } from './ArticleReader';
 
 const modeLabels: Record<Mode,string> = { english: '英语单词', phoneme: '单独音素', pinyin: '拼音观察' };
 const verdictLabels = { match: '音素序列相符', different: '音素序列不同', uncertain: '暂时无法判断', observation: '等待家长观察' };
@@ -32,7 +33,8 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('english');
   const [targetId, setTargetId] = useState('cat');
   const target = targets.find(t => t.id === targetId)!;
-  const [tab, setTab] = useState<'lab'|'history'>('lab');
+  const [tab, setTab] = useState<'lab'|'history'|'articles'>('lab');
+  const [readerBusy, setReaderBusy] = useState(false);
   const [phase, setPhase] = useState<'idle'|'requesting'|'recording'|'analysing'>('idle');
   const [modelState, setModelState] = useState<'cold'|'loading'|'ready'|'error'>('cold');
   const [engine, setEngine] = useState('');
@@ -52,6 +54,10 @@ export default function App() {
   const importRef = useRef<HTMLInputElement | null>(null);
   const referencePlayer = useRef<ReferencePlayerHandle>(null);
   const busy = phase !== 'idle' || modelState === 'loading';
+  function navigate(next: 'lab'|'history'|'articles') {
+    if (busy || readerBusy) return;
+    referencePlayer.current?.stop(); audio.current?.pause(); setPlaying(false); setTab(next);
+  }
 
   useEffect(() => {
     try { saveObservations(observations); } catch { setError('设备存储空间不足，记录未能保存。请导出当前记录。'); }
@@ -156,12 +162,12 @@ export default function App() {
   const correctCount = validLabels.filter(o => o.parentLabel === 'correct').length;
 
   return <div className="app-shell">
-    <header className="topbar"><a className="brand" href="#" onClick={event => { event.preventDefault(); setTab('lab'); }}><span className="brand-mark"><AudioLines size={25} /></span><span>小小声音<span className="brand-light">实验室</span><small>LITTLE VOICE LAB</small></span></a><span className="version-pill">家庭测试版 <span>0.2</span></span></header>
+    <header className="topbar"><a className="brand" href="#" onClick={event => { event.preventDefault(); navigate('lab'); }}><span className="brand-mark"><AudioLines size={25} /></span><span>小小声音<span className="brand-light">实验室</span><small>LITTLE VOICE LAB</small></span></a><span className="version-pill">家庭测试版 <span>0.3</span></span></header>
     <main>
       <section className="intro"><div><p className="eyebrow"><span /> LISTEN. NOTICE. LEARN.</p><h1>认真听见，<br className="mobile-break" />每一个小声音<span className="sun-dot">。</span></h1><p className="intro-copy">录一小段，听一遍，看看模型听到了什么。</p></div><div className="intro-stamp"><Headphones size={32} strokeWidth={1.5} /><span>声音留在<br />这台设备上</span></div></section>
-      <nav className="tabs" aria-label="主要页面"><button className={tab === 'lab' ? 'active' : ''} onClick={() => setTab('lab')}><FlaskConical size={18} /> 语音实验</button><button className={tab === 'history' ? 'active' : ''} onClick={() => setTab('history')}><History size={18} /> 观察记录 <span className="count">{observations.length}</span></button></nav>
+      <nav className="tabs" aria-label="主要页面"><button disabled={busy || readerBusy} className={tab === 'lab' ? 'active' : ''} onClick={() => navigate('lab')}><FlaskConical size={18} /> 语音实验</button><button disabled={busy || readerBusy} className={tab === 'articles' ? 'active' : ''} onClick={() => navigate('articles')}><Headphones size={18}/> 故事阅读</button><button disabled={busy || readerBusy} className={tab === 'history' ? 'active' : ''} onClick={() => navigate('history')}><History size={18} /> 观察记录 <span className="count">{observations.length}</span></button></nav>
       {error && <div className="error" role="alert"><CircleHelp size={20} /><span>{error}</span><button aria-label="关闭提示" onClick={() => setError('')}><X size={18}/></button></div>}
-      {tab === 'lab' ? <div className="lab-grid"><div className="main-column">
+      {tab === 'articles' ? <ArticleReader onBusy={setReaderBusy} onObservation={o => setObservations(old => [o, ...old].slice(0,200))}/> : tab === 'lab' ? <div className="lab-grid"><div className="main-column">
         <section className="card experiment-card"><div className="section-top"><span className="step-number">01</span><h2>选一个声音</h2><span className="muted-small">每次专注一个目标</span></div>
           <div className="mode-switch" role="group" aria-label="练习类型">{(Object.keys(modeLabels) as Mode[]).map(m => <button key={m} disabled={busy} className={mode === m ? 'selected' : ''} onClick={() => changeMode(m)}>{modeLabels[m]}</button>)}</div>
           <div className="target-stage"><span className="target-orbit orbit-a"/><span className="target-orbit orbit-b"/><p className="target-label">{mode === 'english' ? 'READ THE WORD' : mode === 'phoneme' ? 'TRY THE SOUND' : 'EXPLORE THE TONE'}</p><div className={`target-text ${mode === 'pinyin' ? 'pinyin' : ''}`}>{target.text}</div><p className="ipa">{target.ipa}</p></div>

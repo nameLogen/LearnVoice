@@ -13,6 +13,9 @@
 | Lucide | ISC | https://github.com/lucide-icons/lucide |
 | XLSR 音素识别模型 | Apache-2.0（模型卡标注） | https://huggingface.co/facebook/wav2vec2-xlsr-53-espeak-cv-ft |
 | ONNX Q4 导出 | Apache-2.0（模型卡标注） | https://huggingface.co/qnighy/wav2vec2-xlsr-53-espeak-cv-ft-ONNX |
+| CMU US English Dictionary | CMU 允许再分发的许可，见随附 LICENSE | https://github.com/cmusphinx/cmudict |
+
+词典固定版本 `74790861f652b15e4ac49015a90074ad62a27690`，原始文件、校验值及完整许可随应用位于 `dictionary/`。应用自行将 ARPAbet 转为宽式美式 IPA，暂不评测重音，也不根据句意消歧。系统 TTS 声音由设备现有引擎提供，不将其语音包再分发或冒充真人录音。
 
 模型固定版本：`d2987af7ae07d53eafee15dc7190479062faa1e8`。
 

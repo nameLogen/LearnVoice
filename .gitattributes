@@ -4,3 +4,5 @@ gradlew text eol=lf
 *.bat text eol=crlf
 *.java text eol=lf
 *.yml text eol=lf
+# Preserve the pinned upstream dictionary byte-for-byte for SHA-256 validation.
+public/dictionary/cmudict.dict -text

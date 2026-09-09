@@ -13,9 +13,10 @@ async function resample(samples: Float32Array, rate: number): Promise<Float32Arr
   return Float32Array.from(rendered.getChannelData(0));
 }
 
-export async function startRecorder(onLevel: (level: number) => void): Promise<Recorder> {
+export async function startRecorder(onLevel: (level: number) => void, maxSeconds = MAX_SECONDS): Promise<Recorder> {
+  if (!Number.isFinite(maxSeconds) || maxSeconds < 1 || maxSeconds > 30) throw new Error('录音时长必须在 1–30 秒之间。');
   if (isAndroid) {
-    await VoiceLab.startRecording();
+    await VoiceLab.startRecording({ maxSeconds });
     return { stop: async () => Float32Array.from((await VoiceLab.stopRecording()).samples), cancel: () => VoiceLab.cancelRecording() };
   }
   if (!navigator.mediaDevices?.getUserMedia) throw new Error('当前页面无法使用麦克风。请使用安卓安装包，或通过 HTTPS／本机 localhost 打开网页。');
@@ -36,7 +37,7 @@ export async function startRecorder(onLevel: (level: number) => void): Promise<R
     node = new AudioWorkletNode(context, 'voice-capture');
     node.port.onmessage = event => {
       const data = event.data as Float32Array;
-      if (count + data.length > context.sampleRate * MAX_SECONDS) return;
+      if (count + data.length > context.sampleRate * maxSeconds) return;
       chunks.push(data); count += data.length;
       onLevel(Math.min(1, Math.sqrt(data.reduce((sum, x) => sum + x * x, 0) / data.length) * 6));
     };

@@ -66,6 +66,9 @@ public class VoiceLabPlugin extends Plugin {
     }
 
     private synchronized void beginRecording(PluginCall call) {
+        int maxSeconds = call.getInt("maxSeconds", 5);
+        if (maxSeconds < 1 || maxSeconds > 30) { call.reject("录音时长必须在 1–30 秒之间。"); return; }
+        final int captureLimit = RATE * maxSeconds;
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             call.reject("麦克风权限未开启。"); return;
         }
@@ -83,10 +86,10 @@ public class VoiceLabPlugin extends Plugin {
             final AudioRecord source = microphone;
             recording = true;
             recorded = capture.submit(() -> {
-                float[] samples = new float[MAX_SAMPLES]; short[] buffer = new short[1600]; int used = 0;
+                float[] samples = new float[captureLimit]; short[] buffer = new short[1600]; int used = 0;
                 try {
-                    while (recording && used < MAX_SAMPLES) {
-                        int count = source.read(buffer, 0, Math.min(buffer.length, MAX_SAMPLES - used));
+                    while (recording && used < captureLimit) {
+                        int count = source.read(buffer, 0, Math.min(buffer.length, captureLimit - used));
                         if (count < 0) throw new IllegalStateException("录音中断（" + count + "），请重试。");
                         for (int i = 0; i < count; i++) samples[used++] = buffer[i] / 32768f;
                     }
