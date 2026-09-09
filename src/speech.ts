@@ -36,11 +36,11 @@ export function decodeCTC(data: ArrayLike<number>, frames: number, size: number,
     for (let i = 1; i < size; i++) if (data[offset + i] > data[offset + best]) best = i;
     const token = vocabulary[best] ?? '<unk>';
     if (best === previous) {
-      if (phones.length && !token.startsWith('<') && token !== '|') phones[phones.length - 1].end = (frame + 1) / frames * duration;
+      if (phones.length && (!token.startsWith('<') || token === '<unk>') && token !== '|') phones[phones.length - 1].end = (frame + 1) / frames * duration;
       continue;
     }
     previous = best; // Collapse repeated labels BEFORE removing CTC blanks.
-    if (token.startsWith('<') || token === '|') continue;
+    if ((token.startsWith('<') && token !== '<unk>') || token === '|') continue;
     let denominator = 0;
     for (let i = 0; i < size; i++) denominator += Math.exp(data[offset + i] - data[offset + best]);
     phones.push({ token, confidence: 1 / denominator, start: frame / frames * duration, end: (frame + 1) / frames * duration });

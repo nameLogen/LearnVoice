@@ -213,7 +213,7 @@ public class VoiceLabPlugin extends Plugin {
                         for (int frame = 0; frame < logits.length; frame++) {
                             float[] values = logits[frame]; int best = 0;
                             for (int i = 1; i < values.length; i++) if (values[i] > values[best]) best = i;
-                            String token = vocabulary[best]; boolean skip = token.startsWith("<") || token.equals("|");
+                            String token = vocabulary[best]; boolean skip = (token.startsWith("<") && !token.equals("<unk>")) || token.equals("|");
                             if (best == previous) {
                                 if (!skip && lastPhone != null) lastPhone.put("end", (frame + 1) * duration / logits.length);
                                 continue;

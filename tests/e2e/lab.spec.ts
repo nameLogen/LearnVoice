@@ -67,13 +67,16 @@ test('microphone capture can stop, replay and recover after backgrounding',async
     const context=await captureBrowser.newContext({permissions:['microphone']});
     const page=await context.newPage();
     await page.goto('http://127.0.0.1:4173');
+    await page.getByRole('button',{name:'听发音示范',exact:true}).click();
     await page.getByRole('button',{name:'开始录音',exact:true}).click();
     await expect(page.getByRole('button',{name:'结束录音'})).toBeVisible();
+    await expect(page.getByTestId('reference-audio')).toHaveJSProperty('paused',true);
+    await expect(page.getByRole('button',{name:'听发音示范',exact:true})).toBeDisabled();
     await page.waitForTimeout(700);
     await page.getByRole('button',{name:'结束录音'}).click();
     await expect(page.getByRole('button',{name:'回放录音'})).toBeEnabled();
     await page.getByRole('button',{name:'回放录音'}).click();
-    await expect(page.locator('audio')).toHaveJSProperty('paused',false);
+    await expect(page.locator('audio:not([data-testid="reference-audio"])')).toHaveJSProperty('paused',false);
     await page.getByRole('button',{name:'重新录一遍'}).click();
     await expect(page.getByRole('button',{name:'结束录音'})).toBeVisible();
     await page.evaluate(()=>{Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'));});

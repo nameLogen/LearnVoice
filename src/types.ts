@@ -16,4 +16,5 @@ export interface Observation {
   verdict: Verdict; explanation: string;
   parentLabel: 'correct' | 'incorrect' | 'unsure' | null;
   note: string;
+  score?: import('./scoring').PracticeScore;
 }
