@@ -24,7 +24,7 @@ test("dictionary lookup, definitions, word dialog and compact mobile navigation"
   await expect(page.getByText("最近学过")).toBeVisible();
   await page.getByRole("button", { name: "音标", exact: true }).click();
   await expect(page.getByRole("heading", { name: "音标学习" })).toBeVisible();
-  await page.getByRole("button", { name: "/æ/ 短元音", exact: true }).click();
+  await page.getByRole("button", { name: /^\/æ\/ 短元音/ }).click();
   await expect(page.getByRole("button", { name: "播放音标 æ" })).toBeVisible();
   await expect(page.locator(".word-examples")).toContainText("猫");
   await page.getByRole("button", { name: "自然拼读", exact: true }).click();

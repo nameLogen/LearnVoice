@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { sounds, phonics } from "../../src/learning";
 import { meanings, type WordEntry } from "../../src/lexicon";
+import { readTeachingCatalog } from "../../src/soundAudio";
 describe("offline learning content", () => {
   it("contains the 48-entry traditional chart and distinct phonics categories", () => {
     expect(sounds).toHaveLength(48);
@@ -48,21 +49,51 @@ describe("offline learning content", () => {
       ).toBe(true);
     }
   });
-  it("all 48 audio sources are present, attributed and checksum verified", () => {
-    const catalog = JSON.parse(
-      readFileSync("public/sounds/catalog.json", "utf8"),
+  it("only reviewed isolated recordings can enter the teaching catalog", () => {
+    const catalog = readTeachingCatalog(
+      JSON.parse(readFileSync("public/sounds/catalog.v2.json", "utf8")),
     );
-    for (const sound of sounds) {
-      const asset = catalog[sound.id];
-      expect(asset, sound.id).toBeDefined();
-      expect(asset.author).toBeTruthy();
-      expect(asset.source).toMatch(/^https:/);
-      expect(asset.license).toBeTruthy();
+    for (const asset of Object.values(catalog)) {
       const data = readFileSync("public/" + asset.path);
       expect(createHash("sha256").update(data).digest("hex")).toBe(
         asset.sha256,
       );
     }
+  });
+  it("rejects the old catalog, word substitutes and unreviewed sounds", () => {
+    expect(() =>
+      readTeachingCatalog({ ae: { path: "sounds/ae.ogg", kind: "sound" } }),
+    ).toThrow();
+    const fixture = {
+      path: "sounds/approved/ae.wav",
+      kind: "isolated-human",
+      accent: "en-GB",
+      author: "Test fixture",
+      source: "https://example.com/recording",
+      license: "CC0",
+      licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+      sha256: "0".repeat(64),
+      review: { status: "accepted", reviewer: "Fixture", date: "2026-09-09" },
+    };
+    const catalog = (asset: unknown) => ({
+      schemaVersion: 2,
+      entries: { ae: asset },
+    });
+    expect(readTeachingCatalog(catalog(fixture)).ae).toEqual(fixture);
+    for (const invalid of [
+      { kind: "word" },
+      { kind: "sound" },
+      { kind: "synthetic-word" },
+      { accent: "en-US" },
+      { review: { status: "pending" } },
+      { path: "sounds/../ae.wav" },
+      { path: "https://example.com/ae.wav" },
+      { author: "" },
+      { license: "" },
+    ])
+      expect(() =>
+        readTeachingCatalog(catalog({ ...fixture, ...invalid })),
+      ).toThrow();
   });
   it("recognizes inflected verb definitions and combined POS", () => {
     expect(

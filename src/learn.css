@@ -1075,6 +1075,42 @@ details.setting-details {
 .setting-details > p {
   margin: 10px 0;
 }
+.sound-availability {
+  font-size: 11px;
+  color: var(--muted);
+}
+.sound-detail .big-sound:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.sound-detail .big-sound:disabled svg {
+  display: none;
+}
+.sound-import input {
+  max-width: 100%;
+  min-width: 0;
+}
+.sound-import input[type="file"] {
+  width: 100%;
+  margin: 12px 0;
+}
+.sound-import .setting-row input {
+  width: 55%;
+}
+.sound-import small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.sound-preview {
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.sound-preview audio {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
 @media (max-width: 360px) {
   .learn-app {
     padding-inline: 12px;

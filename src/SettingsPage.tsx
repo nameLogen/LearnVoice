@@ -17,6 +17,7 @@ import { inspectAudio } from "./speech";
 import { releaseSpeechEngine } from "./synthesis";
 import { appAssetUrl } from "./assets";
 import type { Observation } from "./types";
+import { SoundAudioSettings } from "./SoundAudioSettings";
 
 export function SettingsPage({
   preferences,
@@ -224,6 +225,12 @@ export function SettingsPage({
               <option value={1.1}>稍快</option>
             </select>
           </label>
+          <SoundAudioSettings
+            beforePreview={player.stop}
+            otherAudioActive={
+              player.state === "playing" || player.state === "loading"
+            }
+          />
           <details className="setting-details">
             <summary>使用设备上的其他离线声音</summary>
             <button

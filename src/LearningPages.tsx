@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, Volume2, ChevronLeft } from "lucide-react";
 import {
   searchWords,
@@ -19,6 +19,7 @@ import { appAssetUrl } from "./assets";
 import { ReadingPractice } from "./ReadingPractice";
 import { targets } from "./targets";
 import type { Observation } from "./types";
+import { loadSoundLibrary, type SoundLibrary } from "./soundAudio";
 
 export function WordExample({
   word,
@@ -197,12 +198,6 @@ export function DictionaryPage({ onWord }: { onWord(word: string): void }) {
     </section>
   );
 }
-interface SoundAsset {
-  path: string;
-  kind: string;
-  changes: string;
-  label?: string;
-}
 export function SoundPage({
   preferences,
   onWord,
@@ -212,15 +207,28 @@ export function SoundPage({
 }) {
   const [group, setGroup] = useState("元音"),
     [selected, setSelected] = useState<SoundLesson | null>(null),
-    [assets, setAssets] = useState<Record<string, SoundAsset>>({}),
+    [library, setLibrary] = useState<SoundLibrary>({
+      bundled: {},
+      local: {},
+      errors: [],
+    }),
+    [loading, setLoading] = useState(true),
     [page, setPage] = useState(0),
     [subgroup, setSubgroup] = useState("全部");
   const player = useSpeechPlayer(preferences);
+  const localUrl = useRef("");
   useEffect(() => {
-    void fetch(appAssetUrl("sounds/catalog.json"))
-      .then((r) => r.json())
-      .then(setAssets)
-      .catch(() => {});
+    let live = true;
+    void loadSoundLibrary().then((value) => {
+      if (live) {
+        setLibrary(value);
+        setLoading(false);
+      }
+    });
+    return () => {
+      live = false;
+      if (localUrl.current) URL.revokeObjectURL(localUrl.current);
+    };
   }, []);
   const groups = ["元音", "辅音", "辅音组合"];
   const categorySounds = sounds.filter((s) =>
@@ -236,16 +244,26 @@ export function SoundPage({
   function play(s: SoundLesson) {
     player.stop();
     setSelected(s);
-    const asset = assets[s.id];
-    if (asset) void player.play("", appAssetUrl(asset.path));
-    else void player.play(s.words[0]);
+    if (localUrl.current) {
+      URL.revokeObjectURL(localUrl.current);
+      localUrl.current = "";
+    }
+    const local = library.local[s.id];
+    const asset = library.bundled[s.id];
+    if (local) {
+      localUrl.current = URL.createObjectURL(local.blob);
+      void player.play("", localUrl.current);
+    } else if (asset) void player.play("", appAssetUrl(asset.path));
   }
+  const available = (id: string) =>
+    Boolean(library.local[id] || library.bundled[id]);
+  const count = sounds.filter((s) => available(s.id)).length;
   return (
     <section>
       <div className="page-title">
         <div>
           <h1>音标学习</h1>
-          <p>48 项教学音标 · 从听见到会读</p>
+          <p>44 个音素 + 4 组辅音 · 英式教学表</p>
         </div>
         <span className="page-emblem">/æ/</span>
       </div>
@@ -265,18 +283,30 @@ export function SoundPage({
             <button
               className="big-sound"
               aria-label={`播放音标 ${selected.symbol}`}
+              disabled={!available(selected.id)}
               onClick={() => play(selected)}
             >
               /{selected.symbol}/ <Volume2 size={26} />
             </button>
             <p>{selected.tip}</p>
             <small>
-              {assets[selected.id]?.label ??
-                (assets[selected.id]?.kind === "word"
-                  ? "真人词例示范，请注意目标声音"
-                  : "真人音节参考（可能含衬元音）")}
+              {loading
+                ? "正在读取示范录音…"
+                : library.local[selected.id]
+                  ? `本机导入 · 英式教学录音 · ${library.local[selected.id].speaker}`
+                  : library.bundled[selected.id]
+                    ? `真人单音示范 · 英式 · ${library.bundled[selected.id].author}`
+                    : "示范录音待补充"}
               {player.state === "loading" ? " · 加载中" : ""}
             </small>
+            {!loading && !available(selected.id) && (
+              <p className="small-caption">
+                可在「设置 → 声音 → 音标教学录音」添加合适的真人示范。
+              </p>
+            )}
+            {library.local[selected.id] && (
+              <small>由本机使用者选择，尚未经过教学审核。</small>
+            )}
           </div>
           <h2 className="section-label">在单词里听一听</h2>
           <div className="word-examples">
@@ -309,6 +339,11 @@ export function SoundPage({
               </button>
             ))}
           </div>
+          <p className="small-caption" role="status">
+            {loading
+              ? "正在读取示范录音…"
+              : `可听示范 ${count} / 48 · 其余录音待补充`}
+          </p>
           <label className="book-select">
             发音方式
             <select
@@ -331,6 +366,13 @@ export function SoundPage({
               <button key={s.id} onClick={() => play(s)}>
                 <b>/{s.symbol}/</b>
                 <small>{s.group}</small>
+                <span className="sound-availability">
+                  {loading
+                    ? "加载中"
+                    : available(s.id)
+                      ? "听示范"
+                      : "录音待补充"}
+                </span>
               </button>
             ))}
           </div>
@@ -352,6 +394,24 @@ export function SoundPage({
             按常见英式教学表编排；组合音已单独标注。
           </p>
         </>
+      )}
+      {library.errors.length > 0 && (
+        <div className="error" role="alert">
+          <p>{library.errors.join(" ")}</p>
+          <button
+            className="text-button"
+            disabled={loading}
+            onClick={() => {
+              setLoading(true);
+              void loadSoundLibrary().then((value) => {
+                setLibrary(value);
+                setLoading(false);
+              });
+            }}
+          >
+            重新读取录音
+          </button>
+        </div>
       )}
       {player.error && (
         <p role="alert" className="error">

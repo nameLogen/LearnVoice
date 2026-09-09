@@ -1,6 +1,7 @@
 import { test, expect, chromium } from "@playwright/test";
 import references from "../../public/references/catalog.json" with { type: "json" };
-import sounds from "../../public/sounds/catalog.json" with { type: "json" };
+import sounds from "../../public/sounds/catalog.v2.json" with { type: "json" };
+import type { TeachingSound } from "../../src/soundAudio";
 test("all bundled recordings decode with audible output", async ({
   page,
 }, info) => {
@@ -9,7 +10,10 @@ test("all bundled recordings decode with audible output", async ({
     "Decode the complete audio library once.",
   );
   await page.goto("/");
-  for (const a of [...Object.values(references), ...Object.values(sounds)]) {
+  for (const a of [
+    ...Object.values(references),
+    ...Object.values(sounds.entries as Record<string, TeachingSound>),
+  ]) {
     const result = await page.evaluate(async (path) => {
       const ctx = new AudioContext();
       try {

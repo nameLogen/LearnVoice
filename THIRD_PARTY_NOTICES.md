@@ -1,6 +1,6 @@
 # 第三方组件与模型
 
-真人词汇与拼音素材的作者、来源、许可与剪辑说明见 [原有音频署名](public/references/ATTRIBUTION.md)。48 项音标的真人/合成来源见 [音标署名](public/sounds/ATTRIBUTION.md)。应用设置提供来源入口。
+真人词汇与拼音素材的作者、来源、许可与剪辑说明见 [原有音频署名](public/references/ATTRIBUTION.md)。旧版 48 项音标混合素材已从发布资源中移除，当前音标素材状态见 [音标署名](public/sounds/ATTRIBUTION.md)。应用设置提供来源入口。
 
 本项目使用以下开源组件，其许可属于各自作者：
 
