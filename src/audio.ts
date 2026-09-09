@@ -1,5 +1,6 @@
 import { SAMPLE_RATE, MAX_SECONDS } from './speech';
 import { isAndroid, VoiceLab } from './native';
+import { appAssetUrl } from './assets';
 
 export interface Recorder { stop(): Promise<Float32Array>; cancel(): Promise<void> }
 async function resample(samples: Float32Array, rate: number): Promise<Float32Array> {
@@ -30,7 +31,7 @@ export async function startRecorder(onLevel: (level: number) => void): Promise<R
   };
   try {
     await context.resume();
-    await context.audioWorklet.addModule('/recorder-worklet.js');
+    await context.audioWorklet.addModule(appAssetUrl('recorder-worklet.js'));
     source = context.createMediaStreamSource(stream);
     node = new AudioWorkletNode(context, 'voice-capture');
     node.port.onmessage = event => {

@@ -1,5 +1,6 @@
 import { isAndroid, VoiceLab } from './native';
 import type { RawInference } from './types';
+import { appAssetUrl } from './assets';
 
 let worker: Worker | undefined;
 let sequence = 0;
@@ -23,7 +24,7 @@ function callWorker<T>(command: string, samples?: Float32Array): Promise<T> {
     const id = ++sequence;
     const timer = setTimeout(() => stopWorker('本次处理超过 90 秒，已停止。此设备可能不适合该模型，请尝试更短的录音。'), 90_000);
     pending.set(id, { resolve: value => resolve(value as T), reject, timer });
-    worker!.postMessage({ id, command, samples });
+    worker!.postMessage({ id, command, samples, assetBaseUrl: appAssetUrl('') });
   });
 }
 export const prepareModel = () => isAndroid ? VoiceLab.prepare() : callWorker<{ engine: string }>('prepare');

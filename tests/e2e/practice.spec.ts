@@ -15,7 +15,7 @@ test('all bundled references decode locally and playback stops on navigation',as
   const player=page.getByTestId('reference-audio');
   await expect(player).toHaveJSProperty('paused',false);
   await page.getByRole('button',{name:'cap',exact:true}).click();
-  await expect(player).toHaveAttribute('src','/references/cap.ogg');
+  await expect(player).toHaveAttribute('src','http://127.0.0.1:4173/references/cap.ogg');
   await expect(player).toHaveJSProperty('paused',true);
   await page.getByRole('button',{name:'拼音观察',exact:true}).click();
   await expect(page.getByText('示范读“妈妈”，请只跟读第一个 mā。')).toBeVisible();

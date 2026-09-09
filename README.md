@@ -42,6 +42,18 @@ GitHub Actions 使用 Linux、Node 22、JDK 21、Android SDK 36。当前测试 A
 
 ## 本地开发
 
+### 直接部署网页目录
+
+`dist/` 可部署在网站根目录或任意子目录，例如 `/temp/LearnVoice/`。构建采用相对路径，脚本、样式、图标、示范音频、录音 worklet 和模型运行库均跟随 `index.html` 所在目录加载。
+
+先运行 `npm ci`、`npm run models:download`、`npm run assets:prepare`、`npm run build`，然后上传 **整个 dist 目录的内容**。不要只更新 `index.html` 或某个 JS 文件；必须同时保留 `assets/`、`models/`、`ort/`、`references/`、`licenses/` 和根目录下其他文件。访问 `/temp/LearnVoice/`（末尾有斜杠）或 `/temp/LearnVoice/index.html`。不要求修改服务器网站根目录，也不需要 SPA 路由回退。
+
+GitHub Actions 成功运行后，也可下载 `voice-lab-web-运行编号` 产物，解压后直接上传其中的内容。该压缩包已经包含模型和运行库。
+
+**线上录音必须通过 HTTPS 打开**，localhost 是开发例外。普通 HTTP 页面即使加载成功，浏览器仍可能不提供麦克风 API。静态服务器应正确返回 JS/MJS 的 JavaScript 类型、WASM 的 `application/wasm` 类型；模型路径应返回真实文件，而不是错误页或 HTML 回退页。
+
+覆盖部署后强制刷新浏览器；若使用 CDN，更新 HTML 的缓存。常见 404 原因是仍在使用旧 HTML 中的 JS 文件名，或把 `dist` 目录又套了一层上传。
+
 需要 Node.js 22.12 或更新版本。
 
 ```sh

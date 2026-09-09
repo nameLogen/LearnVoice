@@ -48,6 +48,14 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Browser tests including actual offline model inference
         run: npm run test:e2e
+      - name: Download deployable web files
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-lab-web-${{ github.run_number }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
       - name: Build installable debug APK
         working-directory: android
         run: |

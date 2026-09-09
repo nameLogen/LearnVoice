@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Headphones, Square } from 'lucide-react';
 import catalog from '../public/references/catalog.json';
+import { appAssetUrl } from './assets';
 
 export interface ReferencePlayerHandle { stop(): void }
 export const ReferencePlayer = forwardRef<ReferencePlayerHandle, {targetId:string;disabled:boolean;beforePlay():void}>(function ReferencePlayer({targetId,disabled,beforePlay},ref){
@@ -36,7 +37,7 @@ export const ReferencePlayer = forwardRef<ReferencePlayerHandle, {targetId:strin
     <span className="reference-caption">{reference.label} · 离线播放</span>
     {reference.note && <p className="reference-note">{reference.note}</p>}
     {error && <p role="alert" className="reference-error">{error}</p>}
-    <audio key={targetId} ref={element} data-testid="reference-audio" src={reference.path} preload="none" onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onError={()=>setError('示范文件无法读取，请检查安装包或重新安装。')}/>
+    <audio key={targetId} ref={element} data-testid="reference-audio" src={appAssetUrl(reference.path)} preload="none" onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onError={()=>setError('示范文件无法读取，请检查安装包或重新安装。')}/>
     <details className="reference-credit"><summary>示范来源与许可</summary><p>录音：{reference.author} · {reference.license}</p><p>真人参考录音，尚未经过教学机构审核。</p><p>{reference.changes}</p><a href={reference.source} target="_blank" rel="noreferrer">原文件</a><span> · </span><a href={reference.licenseUrl} target="_blank" rel="noreferrer">许可说明</a></details>
   </div>;
 });
