@@ -6,6 +6,7 @@ interface VoiceLabPlugin {
   stopRecording(): Promise<{ samples: number[] }>;
   cancelRecording(): Promise<void>;
   prepare(): Promise<{ engine: string }>;
+  releaseModel(): Promise<void>;
   analyse(options: { samples: number[] }): Promise<RawInference>;
   exportFile(options: { name: string; content: string }): Promise<void>;
 }

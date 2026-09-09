@@ -1,0 +1,19 @@
+{
+  "cats": {"ipa":"kæts","translation":"n. 猫（cat 的复数）","pos":"n"},
+  "hats": {"ipa":"hæts","translation":"n. 帽子（hat 的复数）","pos":"n"},
+  "hands": {"ipa":"hændz","translation":"n. 手（hand 的复数）","pos":"n"},
+  "beds": {"ipa":"bedz","translation":"n. 床（bed 的复数）","pos":"n"},
+  "birds": {"ipa":"bɜːdz","translation":"n. 鸟（bird 的复数）","pos":"n"},
+  "boats": {"ipa":"bəʊts","translation":"n. 小船（boat 的复数）","pos":"n"},
+  "drew": {"ipa":"druː","translation":"v. 画；拉（draw 的过去式）","pos":"v"},
+  "heard": {"ipa":"hɜːd","translation":"v. 听见（hear 的过去式和过去分词）","pos":"v"},
+  "walked": {"translation":"v. 走路（walk 的过去式和过去分词）","pos":"v"},
+  "jumped": {"translation":"v. 跳（jump 的过去式和过去分词）","pos":"v"},
+  "washed": {"translation":"v. 洗（wash 的过去式和过去分词）","pos":"v"},
+  "played": {"translation":"v. 玩；演奏（play 的过去式和过去分词）","pos":"v"},
+  "cleaned": {"translation":"v. 打扫干净（clean 的过去式和过去分词）","pos":"v"},
+  "opened": {"translation":"v. 打开（open 的过去式和过去分词）","pos":"v"},
+  "wanted": {"translation":"v. 想要（want 的过去式和过去分词）","pos":"v"},
+  "needed": {"translation":"v. 需要（need 的过去式和过去分词）","pos":"v"},
+  "painted": {"translation":"v. 绘画；涂色（paint 的过去式和过去分词）","pos":"v"}
+}

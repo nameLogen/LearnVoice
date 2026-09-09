@@ -2,6 +2,7 @@ node_modules/
 dist/
 public/models/
 public/ort/
+public/tts-ort/
 test-results/
 playwright-report/
 artifacts/

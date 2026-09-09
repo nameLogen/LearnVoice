@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  optimizeDeps: { entries: ['index.html'] },
   worker: { format: 'es' },
   server: { host: '0.0.0.0' },
   build: { target: 'es2022' },

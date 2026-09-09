@@ -184,6 +184,16 @@ public class VoiceLabPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void releaseModel(PluginCall call) {
+        inference.execute(() -> {
+            try {
+                if (session != null) { session.close(); session = null; }
+                call.resolve();
+            } catch (Exception e) { call.reject("释放分析模型失败", e); }
+        });
+    }
+
+    @PluginMethod
     public void analyse(PluginCall call) {
         JSArray array = call.getArray("samples");
         if (array == null || array.length() < 4000 || array.length() > MAX_SAMPLES) { call.reject("录音长度必须在 0.25–5 秒之间。"); return; }

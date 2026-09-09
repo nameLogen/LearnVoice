@@ -38,8 +38,8 @@ jobs:
       - name: Cache pinned offline model
         uses: actions/cache@v4
         with:
-          path: public/models/phoneme
-          key: phoneme-${{ hashFiles('models/manifest.json') }}
+          path: public/models
+          key: speech-v4-${{ hashFiles('models/manifest.json', 'models/tts-manifest.json') }}
       - name: Download and verify model
         run: npm run models:download
       - name: Build and sync Android

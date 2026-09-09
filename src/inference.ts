@@ -28,4 +28,5 @@ function callWorker<T>(command: string, samples?: Float32Array): Promise<T> {
   });
 }
 export const prepareModel = () => isAndroid ? VoiceLab.prepare() : callWorker<{ engine: string }>('prepare');
+export const releaseAnalysisEngine = async () => { if (isAndroid) await VoiceLab.releaseModel(); else stopWorker('已切换到朗读。'); };
 export const analyse = (pcm: Float32Array) => isAndroid ? VoiceLab.analyse({ samples: Array.from(pcm) }) : callWorker<RawInference>('analyse', pcm);

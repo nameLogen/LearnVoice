@@ -1,76 +1,33 @@
-# 小小声音实验室
+# 听读乐园
 
-面向家庭测试的离线语音验证器。先验证手机能否稳定听辨孩子的声音，再将有效能力接入游戏。
+面向家庭的英语与拼音听读应用。使用 React、TypeScript 和 Capacitor，网页和 Android 共用界面；Android 安装包自带朗读、识别模型和词典，录音不上传。
 
-**当前不是专业发音评分系统。** 英语提供实验性的 0–100 音素接近度、逐音素提示和同题前后对照。数字根据模型输出与目标的距离计算，不是发音准确率，也不是与示范录音直接比对。拼音只记录声韵候选和音高曲线，尚未实现自动声调评分。
+## 0.4 功能
 
-## 已实现
+- 英语、拼音两大入口；英语包含词典、音标、自然拼读、故事四页。
+- 48 项传统英式教学音标：20 项元音、24 项辅音、4 项辅音组合。支持按长短元音、双元音、爆破音、摩擦音等分类，每项提供三个例词。
+- 48 项均有示范：43 项真人参考、5 项可控合成词例。部分真人参考含衬元音或为词例，界面明确标注；不将其冒充纯音素录音。来源、作者、授权、修改和校验值见 [音标素材清单](public/sounds/ATTRIBUTION.md)。
+- 123 组常用自然拼读，涵盖基础音、辅音组合、连缀、不发音 e、元音组合、r 相关组合和常见词尾，共使用 363 个不同例词。
+- 770,002 条离线词典词条，支持前缀搜索、中文释义、词性、词形变化和最近查询。大词库不保证覆盖所有英文词；学习例词的释义和词性有自动完整性检查。
+- 所有入口共用单词弹窗：听示范、看释义、看词性、录音、回放；有发音词典参考的单词在结束录音后自动分析。
+- 内置 Kokoro Q8 朗读，提供美式/英式各一男一女四种声音，可调整速度。新增文章或普通词汇不需要逐条录制音频。
+- 故事支持粘贴、UTF-8 TXT、整篇/段落播放、逐句高亮、点词弹窗、段落跟读、暂停续播。内置声音使用真实音频位置续播；可选系统声音可能重听本句。
+- 设置统一管理声音、字号、行距、跟随滚动、文章备份、家长记录与设备检查；沿用旧版文章与练习记录的存储键。
 
-- Capacitor 8 + React + TypeScript，安卓应用和浏览器共用界面。
-- 安卓原生 AudioRecord 录制 16 kHz、单声道音频；浏览器使用 AudioWorklet。
-- 最长 5 秒录音、回放、短音频导入，检查静音、时长和严重削波。
-- 安卓 ONNX Runtime 原生 CPU 推理；浏览器 ONNX Runtime Web/WASM worker 推理。
-- XLSR 多语言音素模型的真实 CTC 输出、时间位置及序列比较。
-- 英语单词、孤立音素、`mā / má / mǎ / mà` 拼音观察。
-- 家长标注、备注、本地历史记录（最多 200 条）、JSON 导出。
-- 分别统计已标注样本中的“读错却匹配”和“读对却不同”；无法判断及拼音观察不混入统计。
-- GitHub Actions 自动构建、测试并上传可安装的 Android debug APK。
-- 14 个目标内置真人发音参考，点击“听发音示范”即可离线播放；`mā` 使用“妈妈”的第一个音作为词例。
-- 英语音素接近度、漏音/多音提示、下一遍练习建议、同题历史变化。详见 [评分说明](docs/SCORING.md)。
-- **0.3 故事阅读**：粘贴英语文章或导入 UTF-8 TXT，全文/段落朗读、逐句高亮、点词发音与本地测试。
-- 内置 CMU 英语发音词典（超过 10 万词条）；新增文章不改代码。未收录词可跟读回放，暂不评分。
-- 段落拆成短句跟读，每次最多 30 秒；保存完成进度，暂不提供整句准确率。
-- 最多 20 篇本机文章、每篇 30,000 字符；文章和进度支持 JSON 备份导入/导出。
+**评分是实验性的音素接近度，不是发音准确率。** 参考音素来自美式 CMU 词典，尚未针对儿童校准，也不评测重音、节奏和所有细微发音差别。英式示范与美式参考可能存在差异。拼音目前保留 mā/má/mǎ/mà 四声观察，不判断声调对错；段落跟读记录完成进度，不输出整句准确率。详见 [评分原理](docs/SCORING.md)。
 
-### 开始故事阅读（离线声音）
+## 用 GitHub 打包
 
-1. 打开“故事阅读”，先检查“离线合成朗读”区域是否列出了声音。
-2. 如果没有声音，在设备的文字转语音设置中准备英语离线语音包，再点“重新检测”。不同 Android 设备可能需要先安装支持离线英语的 TTS 引擎；本应用不自动下载或使用在线声音。
-3. 用内置短故事测试“全文播放”，然后点一个单词，或选择“跟读第 1 段”。
-4. “添加文章”可粘贴新内容；“导入 TXT”可从文件录入。内容保存在当前应用/浏览器内，不需要重新构建应用。
-5. 段落练习按“听这一句 → 开始跟读录音 → 回放 → 这一句练好了，继续”进行。完成进度不代表读音正确。
+1. 推送到 `main` 后，仓库 [Actions](https://github.com/nameLogen/LearnVoice/actions) 自动运行 **Android APK**，也可手动 Run workflow。
+2. 构建会运行单元测试，下载并校验两套固定版本模型，打包网页，执行浏览器测试，再构建、Lint Android。
+3. 成功后下载 `voice-lab-android-运行编号`，解压并安装 `voice-lab-debug.apk`；网页包为 `voice-lab-web-运行编号`。
+4. Android 中打开设置试听声音，进入词典查 `cat` 并录音；之后用飞行模式验证目标设备。
 
-Android 调用系统 TTS，仅选择声明不需要网络、已安装的英语声音；网页仅选择 `localService=true` 的英语声音。**本版未内置通用 TTS 声音模型**，所以不保证所有设备装上 APK 后都有英语朗读声音。语音包准备完毕后，请用飞行模式试听确认。已有 14 个真人参考不依赖系统 TTS。
+GitHub 产物保留 14 天。这是 debug 测试包，不同构建签名可能不同；遇到不能覆盖安装时，先在设置中导出文章和练习记录，再处理旧安装。应用名称改为“听读乐园”，包名仍是 `cn.learn48.voicelab`，已有数据不会因名称变化而迁移。
 
-详见 [文章阅读原理与验证边界](docs/READING.md)。
+## 本地运行
 
-## 通过 GitHub 打包安卓 APK
-
-不需要购买 Capacitor 云服务，也不需要在自己的电脑安装 Android Studio 来触发云构建。
-
-1. 将此目录提交到 GitHub 仓库，包含 `android/`、`package-lock.json` 和 `.github/workflows/android.yml`。
-2. 打开仓库的 **Actions → Android APK**。推送到 `main/master` 或创建 PR 会自动触发，也可以点击 **Run workflow** 手动触发。
-3. 等待构建成功，在该次运行页面底部的 **Artifacts** 下载 `voice-lab-android-运行编号`。
-4. 解压下载文件，将 `voice-lab-debug.apk` 传到安卓设备并安装。
-5. 打开应用，允许麦克风权限，点击“检查并载入模型”，录音后运行“开始本地分析”。
-
-构建时会从 Hugging Face 下载固定版本模型，逐个校验 SHA-256，然后嵌入 APK。**模型不进入 Git 历史。** GitHub 模型缓存用于减少后续下载，缓存内容仍会校验。
-
-构建顺序：`npm ci` → 单元测试 → 下载与校验模型 → 网页构建 → `cap sync android` → 浏览器测试及真实模型推理 → `:app:assembleDebug / :app:lintDebug / :app:testDebugUnitTest` → 上传 APK。
-
-GitHub Actions 使用 Linux、Node 22、JDK 21、Android SDK 36。当前测试 APK 包含 arm64-v8a 和 x86_64；不包含旧的 32 位 ARM。平台最低版本为 Android 7/API 24，但本项目建议先在较新的 64 位安卓设备测试；最低 API 不代表旧设备有足够内存运行模型。
-
-产物保留 14 天。GitHub Actions 自身的额度按仓库及账号方案计算，并非承诺无限免费。
-
-### 签名与更新
-
-当前生成的是 **debug 测试包**，不是商店发布包，不需要设置签名 Secrets。不同云构建生成的默认 debug 签名可能不同，因此不保证覆盖安装；若系统提示签名不一致，请先导出观察记录，再卸载旧版安装新包。需要长期稳定升级时，另行配置固定的签名密钥。不要将私钥或 keystore 提交到仓库。
-
-## 本地开发
-
-### 直接部署网页目录
-
-`dist/` 可部署在网站根目录或任意子目录，例如 `/temp/LearnVoice/`。构建采用相对路径，脚本、样式、图标、示范音频、录音 worklet 和模型运行库均跟随 `index.html` 所在目录加载。
-
-先运行 `npm ci`、`npm run models:download`、`npm run assets:prepare`、`npm run build`，然后上传 **整个 dist 目录的内容**。不要只更新 `index.html` 或某个 JS 文件；必须同时保留 `assets/`、`models/`、`ort/`、`references/`、`licenses/` 和根目录下其他文件。访问 `/temp/LearnVoice/`（末尾有斜杠）或 `/temp/LearnVoice/index.html`。不要求修改服务器网站根目录，也不需要 SPA 路由回退。
-
-GitHub Actions 成功运行后，也可下载 `voice-lab-web-运行编号` 产物，解压后直接上传其中的内容。该压缩包已经包含模型和运行库。
-
-**线上录音必须通过 HTTPS 打开**，localhost 是开发例外。普通 HTTP 页面即使加载成功，浏览器仍可能不提供麦克风 API。静态服务器应正确返回 JS/MJS 的 JavaScript 类型、WASM 的 `application/wasm` 类型；模型路径应返回真实文件，而不是错误页或 HTML 回退页。
-
-覆盖部署后强制刷新浏览器；若使用 CDN，更新 HTML 的缓存。常见 404 原因是仍在使用旧 HTML 中的 JS 文件名，或把 `dist` 目录又套了一层上传。
-
-需要 Node.js 22.12 或更新版本。
+需要 Node 22.12+。
 
 ```sh
 npm ci
@@ -79,17 +36,7 @@ npm run assets:prepare
 npm run dev
 ```
 
-在本机浏览器打开终端显示的 localhost 地址。录音要求 HTTPS 或 localhost；手机直接访问电脑的普通 HTTP 局域网地址通常不能获得麦克风，首次手机验证优先安装 APK。
-
-安卓本地构建还需要 JDK 21 和 Android SDK 36：
-
-```sh
-npm run android:sync
-cd android
-./gradlew :app:assembleDebug
-```
-
-Windows 使用 `gradlew.bat`。设置 `ANDROID_HOME` 和 `JAVA_HOME`，或在不提交的 `android/local.properties` 中配置 SDK 路径。
+两套模型和四个声音的固定版本、文件尺寸和 SHA-256 分别在 `models/manifest.json`、`models/tts-manifest.json`。下载脚本仅用于开发/打包；模型不提交到 Git，GitHub Actions 缓存下载结果。`npm run models:download` 会准备识别和朗读两部分。
 
 ```sh
 npm test
@@ -98,40 +45,46 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-端到端测试包含：手机/桌面布局、导入静音录音、无有效声音时拒绝比较、标注持久化、导出、缺失模型错误，以及真实模型在浏览器中的推理。真实模型测试使用合成音调，仅检查部署和无外部请求，不检验发音准确率。`npm run test:model` 可单独执行此项（需先准备模型并构建）。
+浏览器测试覆盖手机/桌面、真实录音后自动分析、全部音频解码、四种真实离线声音、暂停续播、子目录部署、数据保存及异常恢复。测试证明功能链路，不证明儿童发音评分准确。
 
-## 数据、离线与模型
+本地 Android 需要 JDK 21、Android SDK 36：
 
-- 安卓 APK 包含运行库和模型，初次启动会将模型解包到应用私有目录，并验证哈希。安装后可在飞行模式下录音和分析。
-- 安装包中的模型约 230 MiB，解包及推理还需要额外磁盘和运行内存。请以真机测量为准。
-- 浏览器模式也只请求同一站点的模型/运行库，不将音频发送给任何识别 API；目前网页未实现完整 PWA 缓存，因此不能承诺关闭网页后断网重开。安卓 APK 才是本版完整离线入口。
-- 原始录音仅驻留当前页面内存，切换目标、重新录音或关闭页面后丢弃；不会自动写入长期存储或导出文件。
-- 观察结果存储在应用/浏览器本地。导出由用户主动操作，包含目标、音素、模型版本、耗时、音高观察、家长标注和备注，不包含录音。
-- 禁用安卓系统备份；应用没有登录、广告、分析上报或在线识别服务。
+```sh
+npm run android:sync
+cd android
+./gradlew :app:assembleDebug :app:lintDebug
+```
 
-模型来源与固定版本见 `models/manifest.json`：
+Windows 使用 `gradlew.bat`。SDK 和 JDK 路径通过 `ANDROID_HOME`、`JAVA_HOME` 配置，不提交个人目录或签名密钥。
 
-- 原模型：[facebook/wav2vec2-xlsr-53-espeak-cv-ft](https://huggingface.co/facebook/wav2vec2-xlsr-53-espeak-cv-ft)
-- ONNX Q4 导出：[qnighy/wav2vec2-xlsr-53-espeak-cv-ft-ONNX](https://huggingface.co/qnighy/wav2vec2-xlsr-53-espeak-cv-ft-ONNX)
-- 许可标注：Apache-2.0，详见 `THIRD_PARTY_NOTICES.md`。
+## 网页部署
 
-## 如何做一次有用的家庭测试
+将 **整个 dist 的内容**原样上传，可以部署到网站根目录，也可以放在 `/temp/LearnVoice/` 等子目录。不要只上传 `index.html` 或 `assets`。
 
-1. 先选 `cat`，自然读对几次，再故意改读 `cap` 或漏掉末尾声音。
-2. 每次先回放，再标记**孩子实际是否读对**，不要照着模型结果标注。
-3. 分别尝试整词、孤立音素和安静/普通家庭环境，避免把不同条件混在一起。
-4. 测试拼音四声时，只将音高曲线作为观察线索，由家长判断。模型当前没有声调评分，不能据此推断四声已过关。
-5. 看导出的错误样本及模型耗时，决定哪些题型适合进入游戏。
+```text
+index.html, favicon.svg, recorder-worklet.js
+assets/       界面及 Worker
+models/       phoneme/ 与 kokoro/ 两套本地模型
+ort/          识别 WASM
+tts-ort/      朗读 WASM
+dictionary/   发音词典
+lexicon/      中文释义词库
+references/   原有真人词汇与拼音示范
+sounds/       48 项音标示范
+licenses/     来源与许可
+```
 
-本轮需真机确认的内容：目标机型的首次加载、实际儿童声音、麦克风权限/中断恢复、连续使用的内存与发热，以及完全断网安装后运行。没有这些证据前，不应宣称儿童发音判断达到可靠水平。
+资源路径使用相对构建路径，避免旧版部署到子目录后仍请求 `/assets/...`。服务器需正确提供 WASM/JSON/音频静态文件，不能把找不到的资源重写成 HTML。远程网页录音需要 **HTTPS**；HTTP 网站可以显示页面，但浏览器通常不会开放麦克风。localhost 开发地址例外。
 
-## 主要文件
+网页版从自己的部署站点读取资源，无在线识别/朗读 API；尚未实现完整 PWA 离线冷启动缓存。**安装 APK 是目前完整离线的入口**。两套模型约 334 MB，词典约 85 MB，另有运行库；安装、解包和运行需预留存储空间，低内存设备须实测。朗读与评分切换时释放另一套模型，降低同时驻留的内存。
 
-- `src/App.tsx`：验证界面与实验记录。
-- `src/speech.ts`：音频检查、CTC 解码、序列比较、音高观察。
-- `src/inference.worker.ts`：浏览器本地推理。
-- `android/app/src/main/java/cn/learn48/voicelab/VoiceLabPlugin.java`：安卓录音、推理、文件分享。
-- `scripts/download-model.mjs`：固定版本下载及校验。
-- `.github/workflows/android.yml`：GitHub 自动打包。
+## 内容与维护
 
-GitHub 仓库：[nameLogen/LearnVoice](https://github.com/nameLogen/LearnVoice)。
+- 添加文章：应用中操作即可，无需改代码。最多 20 篇，每篇 30,000 字符。
+- 添加/修改拼读课：`src/learning.ts`，每组指定拼写、声音、分类、提示和例词。
+- 修订少量词义：`content/word-overrides.json`，运行词库构建脚本后重新打包；人工修订优先于上游词库。
+- 更换音标录音：更新 `public/sounds/catalog.json` 中的作者、来源、授权、说明和校验值，保留署名。
+- 重建完整词库：按 `public/lexicon/SOURCE.json` 下载固定版 ECDICT CSV 到 `artifacts/sources/ecdict.csv`，其 LICENSE 保存为 `artifacts/sources/ECDICT-LICENSE`，然后运行 `node scripts/build-lexicon.mjs`。
+- 原始录音只保留在当前界面内存中。长期记录保存分析结果、家长备注和完成进度；卸载或清除数据前，在设置中备份。
+
+更多实现说明见 [阅读和词典原理](docs/READING.md)、[第三方来源](THIRD_PARTY_NOTICES.md)。
